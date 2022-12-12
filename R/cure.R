@@ -10,15 +10,19 @@
 #'
 #' @param alpha the shrinkage factor to use
 #'
+#' @param verbose Print remaining number of clusters? If TRUE, when number of clusters
+#' is divisible by 10, the number of clusters is printed. Default is FALSE.
+#'
 #' @return A data frame containing columns for x, y, and the assigned cluster label
 #'
-#' @import stats, dplyr, nabor
+#' @import stats
+#' @import nabor
 #'
 #' @examples
 #' cure(iris$Sepal.Length, iris$Sepal.Width, 3, 2, 0.25)
 #'
 
-cure <- function(x, y, k, c, alpha){
+cure <- function(x, y, k, c, alpha, verbose = FALSE){
   #First initialize the data frame containing the points and the data frame containing the representative points
 
   df <- data.frame(x = x, y = y, clus.lab = 1:length(x))
@@ -47,8 +51,10 @@ cure <- function(x, y, k, c, alpha){
   q <- length(unique(df$clus.lab))
 
   while(q > k){
-    if(q %% 10 == 0){
-      print(q)
+    if(verbose){
+      if(q %% 10 == 0){
+        print(q)
+      }
     }
 
 
