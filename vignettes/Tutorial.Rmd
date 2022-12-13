@@ -1,0 +1,215 @@
+---
+title: "Tutorial"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library("ggplot2")
+library("tictoc")
+library(CURE)
+```
+
+## Example 1: Non-Spherical Clusters
+
+CURE is a clustering algorithm that uses representative points to merge clusters. 
+The use of representative points allows it to recognize and identify non-hyperspherical
+clusters, and its shrinkage of representative points makes it robust to outliers.
+In this tutorial, we will use CURE to cluster data from a data set that contains 
+2 clusters that are parabolic shaped. This data set is included with the R package
+under the name jain. This data was taken from a Python implementation of CURE and can 
+be accessed at https://github.com/Kchu/CURE-cluster-python. Let us first take a look 
+at the data set:
+
+```{r}
+head(jain)
+```
+
+And we can confirm that there are two clusters:
+
+```{r}
+length(unique(jain$true.clus))
+```
+
+Now let us plot the original data:
+
+```{r}
+par_df <- jain
+names(par_df) <- c("x", "y", "Cluster")
+par_df$Cluster <- as.factor(par_df$Cluster)
+ggplot(par_df, aes(x = x, y = y, color = Cluster)) + geom_point() +
+  labs(x = "X", y = "Y") +
+  theme(axis.text = element_text(size = 14), axis.title.x = element_text(size  = 14),
+        axis.title.y = element_text(size = 14), legend.text = element_text(size = 14), 
+        legend.title = element_text(size = 14)) 
+```
+
+We can clearly see the two parabolic clusters. This is a scenario where a centroid
+based clustering algorithm such as k-means should work poorly. We will now run 
+CURE with shrinkage parameter $\alpha = 0.75$, $c = 5$ representative points, and 
+a desired $k = 2$ clusters. We will time the algorithm using the tictoc package in R.
+
+```{r}
+tic()
+cure_df <- cure(x = jain$x, y = jain$y, k = 2, c = 5, alpha = 0.75)
+toc()
+```
+
+This should take ~20 seconds. Let us take a look at the output of the cure function:
+
+```{r}
+names(cure_df)
+```
+
+There are two outputs. The first is names "points" and contains most of the information
+that we want. The second element of the returned list is a data frame named "rep_pts".
+It is not useful but is given to the user out of potential interest. Let us take a look
+at the points data frame:
+
+```{r}
+head(cure_df$points)
+```
+
+We can see multiple things returned, but the most important is the clus.lab column
+that assigns the estimated cluster label to the input point. Note that the labels
+will be somewhat arbitrary and we can change them back to the original:
+
+```{r}
+cure_par_df <- cure_df$points[,1:3]
+names(cure_par_df)[3] <- "Cluster"
+cure_par_df$Cluster <- as.factor(cure_par_df$Cluster)
+levels(cure_par_df$Cluster) <- c("2", "1")
+head(cure_par_df)
+```
+
+Let us calculate the accuracy of CURE and plot the points again:
+
+```{r}
+cure_par_df$trueCluster <- as.numeric(par_df$Cluster)
+acc_par <- mean(as.numeric(cure_par_df$Cluster) == cure_par_df$trueCluster)
+acc_par <- max(acc_par, 1 - acc_par)
+
+ggplot(cure_par_df, aes(x = x, y = y, color = Cluster)) + geom_point() +
+  labs(x = "X", y = "Y") + 
+  theme(axis.title.x = element_text(size = 14), axis.title.y = element_text(size = 14), 
+        axis.text = element_text(size = 14), legend.text = element_text(size = 14), 
+        legend.title = element_text(size = 14)) +
+  annotate("text", x = 27.5, y = 0.5, label = paste0("Accuracy = ", round(acc_par, 4)), size = 14/.pt)
+```
+
+We can see that the majority of points have been appropriately clustered with 
+the exception of some points on right end of the top parabola. An accuracy of
+0.9464 is quite good. Let us compare to the k-means approach given in the 
+stats package:
+
+```{r}
+set.seed(1)
+kmeans_list <- kmeans(jain[,1:2], 2)
+kmeans_par_df <- data.frame(x = jain$x, y = jain$y, Cluster = kmeans_list$cluster)
+kmeans_par_df$Cluster <- as.factor(kmeans_par_df$Cluster)
+kmeans_par_df$trueCluster <- as.numeric(par_df$Cluster)
+acc_par_kmeans <- mean(as.numeric(kmeans_par_df$Cluster) == kmeans_par_df$trueCluster)
+acc_par_kmeans <- max(acc_par_kmeans, 1- acc_par_kmeans)
+
+ggplot(kmeans_par_df, aes(x = x, y = y, color = Cluster)) + geom_point() +
+  labs(x = "X", y = "Y") +
+  theme(axis.title.x = element_text(size = 14), axis.title.y = element_text(size = 14), 
+        axis.text = element_text(size = 14), legend.text = element_text(size = 14), 
+        legend.title = element_text(size = 14)) +
+  annotate("text", x = 27.5, y = 0.5, label = paste0("Accuracy = ", round(acc_par_kmeans, 4)), size = 14/.pt)
+
+```
+
+We can clearly see that much of the bottom cluster has been misclassified and 
+the accuracy is much lower than that of CURE. We will do one more example that
+shows that CURE also works for spherical data.
+
+## Example 2: Spherical Data
+
+In this section we will look at the data set threeClus which is included in the 
+R package. This data set was also taken from a Python implementation of CURE and 
+can be found at https://github.com/Kchu/CURE-cluster-python. Let us first visualize 
+the true clusters:
+
+```{r}
+sph_df <- threeClus
+names(sph_df) <- c("x", "y", "Cluster")
+sph_df$Cluster <- as.factor(sph_df$Cluster)
+
+ggplot(sph_df, aes(x = x, y = y, color = Cluster)) + geom_point() +
+  labs(x = "X", y = "Y") + 
+  theme(axis.title.x = element_text(size = 14), axis.title.y = element_text(size = 14), 
+        axis.text = element_text(size = 14), legend.text = element_text(size = 14), 
+        legend.title = element_text(size = 14)) 
+```
+
+Now let us run CURE with the same parameters as before except with $k = 3$:
+
+```{r}
+tic()
+cure_sph <- cure(x = threeClus$x, y = threeClus$y, k = 3, c = 5, alpha = 0.75)
+toc()
+```
+
+This takes slightly longer due to the larger data set ($n = 600$ compared to $n = 373$).
+Let us get the accuracy:
+
+```{r}
+cure_sph_df <- cure_sph$points
+names(cure_sph_df)[3] <- "Cluster"
+cure_sph_df$Cluster <- as.factor(cure_sph_df$Cluster)
+levels(cure_sph_df$Cluster) <- c("1", "2", "3")
+
+cure_sph_df$trueCluster <- as.numeric(sph_df$Cluster)
+cure_sph_df$trueCluster[cure_sph_df$trueCluster == 1] <- 12
+cure_sph_df$trueCluster[cure_sph_df$trueCluster == 2] <- 13
+cure_sph_df$trueCluster[cure_sph_df$trueCluster == 3] <- 11
+cure_sph_df$trueCluster <- cure_sph_df$trueCluster - 10
+acc_sph <- mean(as.numeric(cure_sph_df$Cluster) == cure_sph_df$trueCluster)
+show(acc_sph)
+```
+
+Perfect accuracy. This can also be seen on this plot:
+
+```{r}
+ggplot(cure_sph_df, aes(x = x, y = y, color = Cluster)) + geom_point() +
+  labs(x = "X", y = "Y") +
+  theme(axis.title.x = element_text(size = 14), 
+        axis.title.y = element_text(size = 14), axis.text = element_text(size = 14),)  +
+  annotate("text", x = 1, y = -3, label = paste0("Accuracy = 1.0000"), size = 14/.pt)
+```
+
+In this case we expect k-means to perform well. Let us try:
+
+```{r}
+set.seed(1)
+kmeans_2 <- kmeans(threeClus[,1:2], 3)
+kmeans_sph_df <- data.frame(x = threeClus$x, y = threeClus$y, Cluster = kmeans_2$cluster)
+kmeans_sph_df$Cluster <- as.factor(kmeans_sph_df$Cluster)
+levels(kmeans_sph_df$Cluster) <- c("1", "2", "3")
+
+kmeans_sph_df$trueCluster <- as.numeric(sph_df$Cluster)
+acc_kmeans_sph <- mean(as.numeric(kmeans_sph_df$Cluster) == kmeans_sph_df$trueCluster)
+show(acc_kmeans_sph)
+```
+Again it is 1. And the plot:
+
+```{r}
+ggplot(kmeans_sph_df, aes(x = x, y = y, color = Cluster)) + geom_point() +
+  labs(x = "X", y = "Y") +
+  theme(axis.title.x = element_text(size = 14), 
+        axis.title.y = element_text(size = 14), axis.text = element_text(size = 14))  +
+  annotate("text", x = 1, y = -3, label = paste0("Accuracy = 1.0000"), size = 14/.pt)
+```
+
+Hence in these two examples, CURE does just as well as k-means for spherical data, 
+and does much better for non-spherical data.
+
+
+

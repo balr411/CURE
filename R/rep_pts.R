@@ -8,6 +8,8 @@
 #'
 #' @return A data frame containing the x and y coordinates of the representative points
 #'
+#' @export rep_pts
+#'
 #' @examples
 #' clus_pts <- data.frame(x = threeClus$x, y = threeClus$y, clus.lab = 1:length(threeClus$x))
 #' rep_pts(clus_pts, 5, 0.75)

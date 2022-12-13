@@ -21,6 +21,6 @@ Find distance between two clusters
 }
 \examples{
 rep_pts_df <- data.frame(x = threeClus$x, y = threeClus$y, clus.lab = 1:length(threeClus$x));
-dist(1, 2,rep_pts_df)
+dist_clus(1, 2,rep_pts_df)
 
 }

@@ -23,6 +23,8 @@
 #' @import stats
 #' @import nabor
 #'
+#' @export cure
+#'
 #' @examples
 #' cure(threeClus$x, threeClus$y, 3, 2, 0.25)
 #'

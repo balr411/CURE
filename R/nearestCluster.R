@@ -8,7 +8,10 @@
 #'
 #' @import nabor
 #'
+#' @export nearestCluster
+#'
 #' @examples
+#' rep_pts_df <- data.frame(x = threeClus$x, y = threeClus$y, clus.lab = 1:length(threeClus$x));
 #' nearestCluster(1, rep_pts_df)
 #'
 
