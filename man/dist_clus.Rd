@@ -20,7 +20,7 @@ The distance between the clusters
 Find distance between two clusters
 }
 \examples{
-rep_pts_df <- data.frame(x = iris$Sepal.Length, y = iris$Sepal.Width, clus.lab = 1:length(iris$Sepal.Width));
+rep_pts_df <- data.frame(x = threeClus$x, y = threeClus$y, clus.lab = 1:length(threeClus$x));
 dist(1, 2,rep_pts_df)
 
 }

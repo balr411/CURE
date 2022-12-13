@@ -20,6 +20,6 @@ A data frame containing the x and y coordinates of the representative points
 Find the representative points of a cluster
 }
 \examples{
-clus_pts <- data.frame(x = iris$Sepal.Length, y = iris$Sepal.Width, clus.lab = 1:length(iris$Sepal.Width))
-rep_pts(clus_pts, 3, 0.75)
+clus_pts <- data.frame(x = threeClus$x, y = threeClus$y, clus.lab = 1:length(threeClus$x))
+rep_pts(clus_pts, 5, 0.75)
 }

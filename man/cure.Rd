@@ -27,6 +27,6 @@ A data frame containing columns for x, y, and the assigned cluster label
 Cluster two-dimensional data
 }
 \examples{
-cure(iris$Sepal.Length, iris$Sepal.Width, 3, 2, 0.25)
+cure(threeClus$x, threeClus$y, 3, 2, 0.25)
 
 }
