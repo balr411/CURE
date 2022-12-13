@@ -9,12 +9,12 @@
 #' @return A data frame containing the x and y coordinates of the representative points
 #'
 #' @examples
-#' clus_pts <- data.frame(x = iris$Sepal.Length, y = iris$Sepal.Width, clus.lab = 1:length(iris$Sepal.Width))
-#' rep_pts(clus_pts, 3, 0.75)
+#' clus_pts <- data.frame(x = threeClus$x, y = threeClus$y, clus.lab = 1:length(threeClus$x))
+#' rep_pts(clus_pts, 5, 0.75)
 
 rep_pts <- function(x, npt = 3, alpha = 0.5){
-  max_dist <- function(x, pts){ #could do an iteration of this with stats::dist which would probably be faster
-    idx_max <- which.max(rowSums(apply(pts, 1, function(pt_row) (x[,1]-pt_row[1])^2+(x[,2]-pt_row[2])^2),na.rm = T)) #should we be taking the square roots here?
+  max_dist <- function(x, pts){
+    idx_max <- which.max(rowSums(apply(pts, 1, function(pt_row) (x[,1]-pt_row[1])^2+(x[,2]-pt_row[2])^2),na.rm = T))
     return(list(pt = x[idx_max,], idx = idx_max)) #return both the index and the farthest point
   }
 
@@ -30,7 +30,7 @@ rep_pts <- function(x, npt = 3, alpha = 0.5){
     dists_centroid <- rowSums((x - mat)^2)
     idx_max <- which.max(dists_centroid)
     pts[1,] <- x[idx_max,]
-    x <- x[-idx_max,] #Careful of when we have few points left in x maybe?
+    x <- x[-idx_max,]
 
     #Now loop to find the other well scattered points
     for(i in 2:n_iter){
@@ -43,6 +43,8 @@ rep_pts <- function(x, npt = 3, alpha = 0.5){
   }
 
   centroid_mat <- matrix(centroid, nrow = nrow(pts), ncol = 2, byrow = T)
+
+  #shrink well-scattered points towards the centroid
   repts = pts + alpha*(centroid_mat - pts)
   return(repts)
 }

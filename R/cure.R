@@ -19,7 +19,7 @@
 #' @import nabor
 #'
 #' @examples
-#' cure(iris$Sepal.Length, iris$Sepal.Width, 3, 2, 0.25)
+#' cure(threeClus$x, threeClus$y, 3, 2, 0.25)
 #'
 
 cure <- function(x, y, k, c, alpha, verbose = FALSE){
@@ -111,11 +111,10 @@ cure <- function(x, y, k, c, alpha, verbose = FALSE){
       if(x.closest %in% c(u, v)){
         if(df$closest.cluster.dist[x_idx] < dist_curr){
           #Need to find closest cluster to x
-          #Only interested in clusters whose distance from x is more than dist_curr - not really sure how to use that fact here
           nc <- nearestCluster(lab, rep_pts_df)
           x.closest <- nc$id
           x.closest.dist <- nc$min.dist
-        }else{
+        }else{ #closest cluster must be merged cluster
           x.closest <- new_lab
           x.closest.dist <- dist_curr
         }
@@ -123,7 +122,7 @@ cure <- function(x, y, k, c, alpha, verbose = FALSE){
         df$closest.cluster[df$clus.lab == lab] <- x.closest
         df$closest.cluster.dist[df$clus.lab == lab] <- x.closest.dist
 
-      }else if(df$closest.cluster.dist[x_idx] > dist_curr){
+      }else if(df$closest.cluster.dist[x_idx] > dist_curr){ #closest cluster must be merged cluster
         x.closest <- new_lab
         x.closest.dist <- dist_curr
         df$closest.cluster[df$clus.lab == lab] <- x.closest

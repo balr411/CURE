@@ -13,11 +13,14 @@
 #'
 
 nearestCluster <- function(u, rep_pts_df){
+  #Create data frame containing only cluster u and a data frame containing everything but cluster u
   u_rep <- rep_pts_df[rep_pts_df$clus.lab == u, 1:2]
   other_rep <- rep_pts_df[rep_pts_df$clus.lab != u, 1:2]
 
+  #Use nabor function to efficiently get nearest neighbor
   nab <- nabor::knn(u_rep, other_rep, k = 1)
 
+  #get smallest distance as well as cluster id
   clus_idx <- which.min(nab$nn.dists)
   clus_dist <- nab$nn.dists[clus_idx]
   clust_id <- clus_id <- rep_pts_df$clus.lab[rep_pts_df$clus.lab != u][clus_idx]
