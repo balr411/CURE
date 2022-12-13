@@ -21,7 +21,12 @@ cure(x, y, k, c, alpha, verbose = FALSE)
 is divisible by 10, the number of clusters is printed. Default is FALSE.}
 }
 \value{
-A data frame containing columns for x, y, and the assigned cluster label
+A list containing two outputs:
+\item{points}{Data frame points containing columns for x, y,
+the assigned cluster label, the closest cluster label, the distance to the
+closest cluster, and the centroid of the cluster.}
+\item{rep_pts}{Data frame containing the representative points of each cluster
+with their cluster label}
 }
 \description{
 Cluster two-dimensional data

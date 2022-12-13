@@ -13,7 +13,12 @@
 #' @param verbose Print remaining number of clusters? If TRUE, when number of clusters
 #' is divisible by 10, the number of clusters is printed. Default is FALSE.
 #'
-#' @return A data frame containing columns for x, y, and the assigned cluster label
+#' @return A list containing two outputs:
+#' \item{points}{Data frame points containing columns for x, y,
+#' the assigned cluster label, the closest cluster label, the distance to the
+#' closest cluster, and the centroid of the cluster.}
+#' \item{rep_pts}{Data frame containing the representative points of each cluster
+#' with their cluster label}
 #'
 #' @import stats
 #' @import nabor
@@ -137,6 +142,6 @@ cure <- function(x, y, k, c, alpha, verbose = FALSE){
 
   }
 
-  return(list(df, rep_pts_df))
+  return(list(points = df, rep_pts = rep_pts_df))
 
 }
